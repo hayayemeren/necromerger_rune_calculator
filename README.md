@@ -29,16 +29,37 @@ A complete, production-ready web application for calculating station requirement
 - **Resource Cap Increases ($+\%$):** Real-time tracked bonuses for Max Mana, Max Slime, and Max Darkness.
 
 ### 4. Canonical Game Data (`gameData.ts`)
-| Legendary | Station | Base L1 Cost | Buffs | Category |
-| :--- | :--- | :--- | :--- | :--- |
-| **Lich** | 2× L5 Grave | 20 Ice | +5% Time Shards, +10% Max Mana | Undead |
-| **Gorgon** | 2× L5 Cupboard | 20 Poison | +5% Time Shards, +10% Max Slime | Unholy |
-| **Harpy** | 2× L5 Altar | 20 Blood | +5% Time Shards, +10% Max Darkness | Unholy |
-| **Reaper** | 2× L5 Lectern | 20 Moon + 10 Ice | +10% Time Shards, +10% Max Mana | Undead |
-| **Cyclops** | 2× L5 Fridge | 20 Moon + 10 Poison | +10% Time Shards, +10% Max Slime | Unholy |
-| **Archdemon** | 2× L5 Portal | 20 Death + 10 Blood | +20% Time Shards, +10% Max Darkness | Eldritch |
-| **Robo-Chicken** | 2× L5 Chicken/Fowl | 20 Cosmic | +10% Time Shards | Alien |
-| **Stalker** | 2× L5 Alien Station | 25 Astro + 10 Energy | +25% Time Shards | Alien |
+
+| Legendary | Category | Group | Station(s) | Base L1 Cost | Buffs |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Lich** | Undead | Group 1 | 2× L5 Grave | 20 Ice | +5% Shards, +10% Max Mana |
+| **Gorgon** | Unholy | Group 1 | 2× L5 Cupboard | 20 Poison | +5% Shards, +10% Max Slime |
+| **Harpy** | Unholy | Group 1 | 2× L5 Altar | 20 Blood | +5% Shards, +10% Max Darkness |
+| **Reaper** | Undead | Group 2 | 2× L5 Lectern | 20 Moon + 10 Ice | +10% Shards, +10% Max Mana |
+| **Cyclops** | Unholy | Group 2 | 2× L5 Fridge | 20 Moon + 10 Poison | +10% Shards, +10% Max Slime |
+| **Archdemon** | Eldritch | Group 2 | 2× L5 Portal | 20 Death + 10 Blood | +20% Shards, +10% Max Darkness |
+| **Robo-Chicken** | Alien | Group 3 | 2× L5 Chicken | 20 Cosmic | +10% Shards |
+| **Soul Stalker** | Alien | Group 3 | 2× L5 Alien Station | 25 Astro + 10 Energy | +25% Shards |
+| **Shield Bot** | Alien | Group 3 | 2× L5 Crashed Saucer | 20 Cosmic + 10 Astro | +30% Shards, +10% Shield Chance |
+| **The Cursed** | Fusion | Group 4 | 2× L5 Grave + 2× L5 Lectern | 20 Ice / 20 Moon + 10 Ice | +30% Shards, +20% All Resource Gen |
+| **The Colossus** | Fusion | Group 4 | 2× L5 Cupboard + 2× L5 Fridge | 20 Poison / 20 Moon + 10 Poison | +30% Shards, Combat Food Spawns |
+| **The Infernal** | Fusion | Group 4 | 2× L5 Altar + 2× L5 Portal | 20 Blood / 20 Death + 10 Blood | +30% Shards, +5% Merge Duplicate |
+
+---
+
+### 5. Time Machine & Prestige Shard Calculator
+
+$$\text{Total Shards} = \text{Base}(\text{Devourer Lvl}) \times (1 + \text{Feats}\%) \times (1 + \text{Legendaries}\% + \text{Groups}\%) \times (1 + \text{Other}\%)$$
+
+- **Devourer Level (35–100):** Base shards scaling from 150 (Lvl 35) up to 15,000 (Lvl 100).
+- **Feats Completed (Tier 0–22):** +10% multiplicative boost per completed tier (+0% to +220%).
+- **Legendary Sets / Groups:**
+  - **Group 1:** Lich, Gorgon, Harpy (+20% Group Bonus)
+  - **Group 2:** Reaper, Cyclops, Archdemon (+30% Group Bonus)
+  - **Group 3:** Robo-Chicken, Stalker, Shield Bot (+40% Group Bonus)
+  - **Group 4:** The Cursed, The Colossus, The Infernal (+60% Group Bonus)
+- **Hacker Group Scaling Upgrade:** Scales completed group bonuses by $(1 + \text{upgradeLevel})$ (allowing group bonuses to be claimed multiple times).
+- **Other Shard Boosts:** Input for Inventor experiments, skins, relics, and lair themes.
 
 ### 5. Quick Progression Presets
 - **First Prestige:** Lich + Gorgon (+1 replacement spawner kept)
