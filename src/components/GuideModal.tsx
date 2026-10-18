@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, BookOpen, Layers, ShieldCheck, Zap } from 'lucide-react';
+import { X, BookOpen, Layers, ShieldCheck, Sparkles, Flame } from 'lucide-react';
 
 interface GuideModalProps {
   isOpen: boolean;
@@ -16,19 +16,19 @@ export const GuideModal: React.FC<GuideModalProps> = ({ isOpen, onClose }) => {
       aria-modal="true"
       aria-labelledby="guide-modal-title"
     >
-      <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="bg-slate-900 border-4 border-slate-700 rounded-2xl max-w-xl w-full shadow-pixel overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="p-4 sm:p-5 border-b border-slate-800 bg-slate-950/80 flex items-center justify-between">
+        <div className="p-4 sm:p-5 border-b-2 border-slate-800 bg-slate-950 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-purple-500/20 text-purple-400 rounded-lg">
+            <div className="p-2 bg-purple-950 border border-purple-500 text-purple-400 rounded-xl shadow-pixel-sm">
               <BookOpen className="w-5 h-5" />
             </div>
             <div>
-              <h2 id="guide-modal-title" className="text-lg font-bold font-serif text-white">
-                NecroMerger Fusing & Station Math Guide
+              <h2 id="guide-modal-title" className="font-pixel text-xs sm:text-sm text-white tracking-wider">
+                NECROMERGER RULES & GUIDE
               </h2>
-              <p className="text-xs text-slate-400">
-                How station leveling, legendaries, and rune costs scale
+              <p className="text-xs text-slate-400 font-mono mt-0.5">
+                Station leveling, Surgeon fusions, and Time Machine formulas
               </p>
             </div>
           </div>
@@ -44,78 +44,99 @@ export const GuideModal: React.FC<GuideModalProps> = ({ isOpen, onClose }) => {
         </div>
 
         {/* Content */}
-        <div className="p-5 space-y-4 overflow-y-auto text-xs text-slate-300 leading-relaxed">
+        <div className="p-5 space-y-4 overflow-y-auto text-xs text-slate-300 leading-relaxed font-mono">
           {/* Rule 1: Power of 2 Scaling */}
-          <div className="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800">
-            <h3 className="font-bold text-sm text-purple-300 mb-1 flex items-center gap-2">
-              <Layers className="w-4 h-4 text-purple-400" />
-              1. Station Leveling (Powers of 2)
+          <div className="p-3.5 rounded-xl bg-slate-950 border-2 border-slate-800 shadow-pixel-sm">
+            <h3 className="font-pixel text-[10px] text-purple-300 mb-1 flex items-center gap-2">
+              <Layers className="w-3.5 h-3.5 text-purple-400" />
+              1. Station Powers of 2
             </h3>
             <p className="text-slate-400">
-              In NecroMerger, merging stations follows binary progression: 2^(level - 1):
+              Station merging follows binary scaling: 2^(level - 1).
             </p>
             <ul className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2 font-mono text-[11px]">
               <li className="bg-slate-900 p-1.5 rounded border border-slate-800">
-                Level 1 = <strong>1</strong> base
+                L1 = <strong>1</strong> base
               </li>
               <li className="bg-slate-900 p-1.5 rounded border border-slate-800">
-                Level 2 = <strong>2</strong> base
+                L2 = <strong>2</strong> base
               </li>
               <li className="bg-slate-900 p-1.5 rounded border border-slate-800">
-                Level 3 = <strong>4</strong> base
+                L3 = <strong>4</strong> base
               </li>
               <li className="bg-slate-900 p-1.5 rounded border border-slate-800">
-                Level 4 = <strong>8</strong> base
+                L4 = <strong>8</strong> base
               </li>
               <li className="bg-slate-900 p-1.5 rounded border border-slate-800 col-span-2 sm:col-span-1 text-amber-300">
-                Level 5 = <strong>16</strong> base
+                L5 = <strong>16</strong> base
               </li>
             </ul>
           </div>
 
-          {/* Rule 2: Legendary Fusion Cost */}
-          <div className="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800">
-            <h3 className="font-bold text-sm text-indigo-300 mb-1 flex items-center gap-2">
-              <Zap className="w-4 h-4 text-indigo-400" />
-              2. Fusing a Legendary Minion
-            </h3>
-            <p className="text-slate-400">
-              Merging a Legendary consumes <strong>two max-tier (Level 5) stations</strong>.
-              <br />
-              Standard fusion: $2 \times 16 = \mathbf{32}$ Level 1 base stations.
-            </p>
-          </div>
-
-          {/* Rule 3: Keep Replacement Spawner */}
-          <div className="p-3.5 rounded-xl bg-slate-950/70 border border-teal-500/30 bg-teal-950/20">
-            <h3 className="font-bold text-sm text-teal-300 mb-1 flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-teal-400" />
-              3. The "Keep Replacement Spawner" Rule
+          {/* Rule 2: Keep Replacement Spawner */}
+          <div className="p-3.5 rounded-xl bg-slate-950 border-2 border-teal-500/50 shadow-pixel-sm">
+            <h3 className="font-pixel text-[10px] text-teal-300 mb-1 flex items-center gap-2">
+              <ShieldCheck className="w-3.5 h-3.5 text-teal-400" />
+              2. Keep +1 Replacement Spawner
             </h3>
             <p className="text-slate-300">
-              When you merge a Legendary, both Level 5 stations disappear from your lair! To prevent losing your primary resource generator, experienced necromancers build <strong>3 Level 5 stations</strong> ($3 \times 16 = \mathbf{48}$ Level 1s): 2 are consumed in the ritual, leaving 1 active Level 5 spawner in your lair.
+              Merging a standard legendary consumes <strong>two Level 5 stations</strong> (32 Level 1 base).
+              Enabling *"Keep Replacement"* crafts <strong>3× Level 5 stations</strong> (48 Level 1 base), leaving 1 active spawner in your lair so resource generation doesn't grind to a halt.
             </p>
           </div>
 
-          {/* Rule 4: Owned Stations Offset */}
-          <div className="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800">
-            <h3 className="font-bold text-sm text-emerald-300 mb-1">
-              4. Owned Station Deductions
+          {/* Rule 3: Surgeon Combination Legendaries */}
+          <div className="p-3.5 rounded-xl bg-slate-950 border-2 border-indigo-500/50 shadow-pixel-sm">
+            <h3 className="font-pixel text-[10px] text-indigo-300 mb-1 flex items-center gap-2">
+              <Flame className="w-3.5 h-3.5 text-indigo-400" />
+              3. Surgeon Combination Legendaries
             </h3>
-            <p className="text-slate-400">
-              If you already have spare stations on your board or in your crate, expand the <em>"Subtract Owned Stations"</em> drawer under each card. Each existing station directly credits toward your target, reducing the net runes you still need to farm.
+            <p className="text-slate-400 mb-2">
+              Unlocked via The Surgeon using Astro Coins & Energy Cubes:
             </p>
+            <ul className="space-y-1.5 text-[11px]">
+              <li className="bg-slate-900 p-2 rounded border border-slate-800">
+                <strong className="text-indigo-300">The Cursed:</strong> Fused from 1× Lich + 1× Reaper (2× L5 Grave + 2× L5 Lectern). Grants +20% resource gen & +30% Time Shards.
+              </li>
+              <li className="bg-slate-900 p-2 rounded border border-slate-800">
+                <strong className="text-lime-300">The Colossus:</strong> Fused from 1× Gorgon + 1× Cyclops (2× L5 Cupboard + 2× L5 Fridge). Grants combat food generation & +30% Time Shards.
+              </li>
+              <li className="bg-slate-900 p-2 rounded border border-slate-800">
+                <strong className="text-rose-300">The Infernal:</strong> Fused from 1× Harpy + 1× Archdemon (2× L5 Altar + 2× L5 Portal). Grants 5% duplicate minion chance & +30% Time Shards.
+              </li>
+            </ul>
+          </div>
+
+          {/* Rule 4: Time Machine Formula & Groups */}
+          <div className="p-3.5 rounded-xl bg-slate-950 border-2 border-amber-500/50 shadow-pixel-sm">
+            <h3 className="font-pixel text-[10px] text-amber-300 mb-1 flex items-center gap-2">
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              4. Time Machine Shards & Group Bonuses
+            </h3>
+            <p className="text-slate-400 mb-2">
+              Formula:
+              <br />
+              <code className="text-amber-300 font-bold">
+                Base(Lvl) × (1 + Feats%) × (1 + Legendaries% + Groups%) × (1 + Other%)
+              </code>
+            </p>
+            <ul className="space-y-1 text-[11px] text-slate-300">
+              <li>• <strong>Devourer Base:</strong> Unlocks at Lvl 35 (150 shards), scales up to Lvl 100 (15,000 shards).</li>
+              <li>• <strong>Feats:</strong> +10% multiplier per completed Tier (up to Tier 22 = +220%).</li>
+              <li>• <strong>Groups:</strong> Group 1 (+20%), Group 2 (+30%), Group 3 (+40%), Group 4 (+60%).</li>
+              <li>• <strong>Hacker Upgrade:</strong> Scales group bonus by (1 + upgradeLevel).</li>
+            </ul>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="p-3.5 border-t border-slate-800 bg-slate-950/80 text-right">
+        <div className="p-3.5 border-t-2 border-slate-800 bg-slate-950 text-right">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 bg-purple-700 hover:bg-purple-600 text-white font-semibold rounded-xl text-xs transition-colors"
+            className="px-4 py-2 bg-purple-700 hover:bg-purple-600 text-white font-pixel text-[10px] rounded-xl shadow-pixel active:translate-y-0.5 transition-all"
           >
-            Got It!
+            GOT IT!
           </button>
         </div>
       </div>

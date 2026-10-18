@@ -21,10 +21,18 @@ export default {
         runepink: '#ec4899',
       },
       fontFamily: {
+        pixel: ['"Press Start 2P"', 'monospace'],
+        arcade: ['Silkscreen', 'monospace'],
         mono: ['JetBrains Mono', 'Menlo', 'Monaco', 'Courier New', 'monospace'],
         sans: ['Inter', 'system-ui', 'sans-serif'],
       },
       boxShadow: {
+        'pixel': '3px 3px 0px #000000',
+        'pixel-sm': '2px 2px 0px #000000',
+        'pixel-lg': '5px 5px 0px #000000',
+        'pixel-amber': '3px 3px 0px #78350f',
+        'pixel-purple': '3px 3px 0px #3b0764',
+        'pixel-teal': '3px 3px 0px #134e4a',
         'rune-glow-cyan': '0 0 15px -2px rgba(6, 182, 212, 0.45)',
         'rune-glow-green': '0 0 15px -2px rgba(34, 197, 94, 0.45)',
         'rune-glow-red': '0 0 15px -2px rgba(239, 68, 68, 0.45)',

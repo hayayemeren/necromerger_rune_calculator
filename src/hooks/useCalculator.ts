@@ -7,6 +7,7 @@ import {
   RuneType,
   StashState,
   StationLevel,
+  TimeShardCalculatorState,
 } from '../types/game';
 import {
   INITIAL_OWNED_STATIONS,
@@ -18,21 +19,31 @@ import {
 import { calculateAggregate } from '../utils/calculator';
 import { PresetDef } from '../data/presets';
 
-const STORAGE_KEY_LEGENDARIES = 'necromerger_calc_legendaries_v2';
-const STORAGE_KEY_STASH = 'necromerger_calc_stash_v2';
-const STORAGE_KEY_GLOBAL_KEEP = 'necromerger_calc_global_keep_v2';
+const STORAGE_KEY_LEGENDARIES = 'necromerger_calc_legendaries_v3';
+const STORAGE_KEY_STASH = 'necromerger_calc_stash_v3';
+const STORAGE_KEY_GLOBAL_KEEP = 'necromerger_calc_global_keep_v3';
+const STORAGE_KEY_TIME_SHARD = 'necromerger_calc_timeshard_v3';
 
 const createDefaultLegendaryStates = (): Record<LegendaryId, LegendaryState> => {
   const states = {} as Record<LegendaryId, LegendaryState>;
   for (const id of LEGENDARY_ORDER) {
     states[id] = {
-      // Default to 1 Lich & 1 Gorgon for immediate useful demonstration
       quantity: id === 'lich' || id === 'gorgon' ? 1 : 0,
       keepReplacement: true,
       ownedStations: { ...INITIAL_OWNED_STATIONS },
+      secondaryOwnedStations: LEGENDARIES[id]?.isCombination
+        ? { ...INITIAL_OWNED_STATIONS }
+        : undefined,
     };
   }
   return states;
+};
+
+const defaultTimeShardState: TimeShardCalculatorState = {
+  devourerLevel: 40,
+  featTier: 12,
+  otherBoostPercent: 0,
+  groupUpgradeLevel: 0,
 };
 
 export function useCalculator() {
@@ -49,6 +60,11 @@ export function useCalculator() {
   const [globalKeepReplacement, setGlobalKeepReplacementState] = useLocalStorage<boolean>(
     STORAGE_KEY_GLOBAL_KEEP,
     true
+  );
+
+  const [timeShardState, setTimeShardState] = useLocalStorage<TimeShardCalculatorState>(
+    STORAGE_KEY_TIME_SHARD,
+    defaultTimeShardState
   );
 
   // Set quantity for a legendary
@@ -111,7 +127,7 @@ export function useCalculator() {
     });
   }, [setGlobalKeepReplacementState, setLegendaries]);
 
-  // Set owned station count for a level
+  // Set owned station count for primary station
   const setOwnedStation = useCallback((id: LegendaryId, level: StationLevel, count: number) => {
     const validCount = Math.max(0, Math.floor(count));
     setLegendaries((prev) => ({
@@ -126,6 +142,24 @@ export function useCalculator() {
     }));
   }, [setLegendaries]);
 
+  // Set owned station count for secondary station (combination legendaries)
+  const setSecondaryOwnedStation = useCallback(
+    (id: LegendaryId, level: StationLevel, count: number) => {
+      const validCount = Math.max(0, Math.floor(count));
+      setLegendaries((prev) => ({
+        ...prev,
+        [id]: {
+          ...prev[id],
+          secondaryOwnedStations: {
+            ...(prev[id].secondaryOwnedStations || INITIAL_OWNED_STATIONS),
+            [level]: validCount,
+          },
+        },
+      }));
+    },
+    [setLegendaries]
+  );
+
   // Clear owned stations for a specific legendary
   const clearOwnedStations = useCallback((id: LegendaryId) => {
     setLegendaries((prev) => ({
@@ -133,6 +167,9 @@ export function useCalculator() {
       [id]: {
         ...prev[id],
         ownedStations: { ...INITIAL_OWNED_STATIONS },
+        secondaryOwnedStations: prev[id].secondaryOwnedStations
+          ? { ...INITIAL_OWNED_STATIONS }
+          : undefined,
       },
     }));
   }, [setLegendaries]);
@@ -156,6 +193,35 @@ export function useCalculator() {
   const clearStash = useCallback(() => {
     setStash({ ...INITIAL_STASH });
   }, [setStash]);
+
+  // Time Shard Calculator state controls
+  const setDevourerLevel = useCallback((level: number) => {
+    setTimeShardState((prev) => ({
+      ...prev,
+      devourerLevel: Math.max(1, Math.min(100, Math.floor(level))),
+    }));
+  }, [setTimeShardState]);
+
+  const setFeatTier = useCallback((tier: number) => {
+    setTimeShardState((prev) => ({
+      ...prev,
+      featTier: Math.max(0, Math.min(22, Math.floor(tier))),
+    }));
+  }, [setTimeShardState]);
+
+  const setOtherBoostPercent = useCallback((boost: number) => {
+    setTimeShardState((prev) => ({
+      ...prev,
+      otherBoostPercent: Math.max(0, Math.floor(boost)),
+    }));
+  }, [setTimeShardState]);
+
+  const setGroupUpgradeLevel = useCallback((level: number) => {
+    setTimeShardState((prev) => ({
+      ...prev,
+      groupUpgradeLevel: Math.max(0, Math.floor(level)),
+    }));
+  }, [setTimeShardState]);
 
   // Apply a preset configuration
   const applyPreset = useCallback((preset: PresetDef) => {
@@ -188,19 +254,19 @@ export function useCalculator() {
     });
   }, [setLegendaries]);
 
-  // Full factory reset (targets, owned stations, and stash)
+  // Full factory reset
   const resetFull = useCallback(() => {
     setLegendaries(createDefaultLegendaryStates());
     setStash({ ...INITIAL_STASH });
     setGlobalKeepReplacementState(true);
-  }, [setLegendaries, setStash, setGlobalKeepReplacementState]);
+    setTimeShardState(defaultTimeShardState);
+  }, [setLegendaries, setStash, setGlobalKeepReplacementState, setTimeShardState]);
 
   // Memoized aggregate results
   const aggregate: AggregateCalculationResult = useMemo(() => {
-    return calculateAggregate(LEGENDARIES, legendaries, stash);
-  }, [legendaries, stash]);
+    return calculateAggregate(LEGENDARIES, legendaries, stash, timeShardState);
+  }, [legendaries, stash, timeShardState]);
 
-  // Quick helper to fill stash to match 100% of required runes (useful for testing or one-click planning)
   const fillStashToMatchRequired = useCallback(() => {
     setStash((prev) => {
       const nextStash = { ...prev };
@@ -215,6 +281,7 @@ export function useCalculator() {
     legendaries,
     stash,
     globalKeepReplacement,
+    timeShardState,
     aggregate,
     setQuantity,
     incrementQuantity,
@@ -222,10 +289,15 @@ export function useCalculator() {
     setKeepReplacement,
     setGlobalKeepReplacement,
     setOwnedStation,
+    setSecondaryOwnedStation,
     clearOwnedStations,
     setStashRune,
     adjustStashRune,
     clearStash,
+    setDevourerLevel,
+    setFeatTier,
+    setOtherBoostPercent,
+    setGroupUpgradeLevel,
     applyPreset,
     resetAllTargets,
     resetFull,

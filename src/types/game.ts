@@ -20,45 +20,56 @@ export type LegendaryId =
   | 'cyclops'
   | 'archdemon'
   | 'robo_chicken'
-  | 'stalker';
+  | 'stalker'
+  | 'shield_bot'
+  | 'the_cursed'
+  | 'the_colossus'
+  | 'the_infernal';
+
+export type LegendaryGroup = 'group1' | 'group2' | 'group3' | 'group4';
 
 export interface LegendaryBuffs {
   timeShards: number;
   maxMana?: number;
   maxSlime?: number;
   maxDarkness?: number;
+  shieldChance?: number; // Shield Bot
+  resourceGen?: number;  // The Cursed
+  combatFood?: boolean;  // The Colossus
+  duplicateChance?: number; // The Infernal
 }
 
-export interface RuneCost {
-  rune: RuneType;
-  amount: number;
+export interface SecondaryStationDef {
+  name: string;
+  baseL1Cost: Partial<Record<RuneType, number>>;
 }
 
 export interface LegendaryDef {
   id: LegendaryId;
   name: string;
   stationName: string;
-  category: 'undead' | 'unholy' | 'eldritch' | 'alien';
+  secondaryStationName?: string;
+  category: 'undead' | 'unholy' | 'eldritch' | 'alien' | 'fusion';
+  group: LegendaryGroup;
   baseL1Cost: Partial<Record<RuneType, number>>;
+  secondaryBaseL1Cost?: Partial<Record<RuneType, number>>;
   buffs: LegendaryBuffs;
   accentColor: string;
   glowColor: string;
   description: string;
+  imageSrc: string;
+  isCombination?: boolean;
+  combinationRecipe?: string;
 }
 
 export interface LegendaryState {
   quantity: number;
   keepReplacement: boolean;
   ownedStations: OwnedStations;
+  secondaryOwnedStations?: OwnedStations;
 }
 
 export type StashState = Record<RuneType, number>;
-
-export interface CalculatorState {
-  legendaries: Record<LegendaryId, LegendaryState>;
-  stash: StashState;
-  globalKeepReplacement: boolean;
-}
 
 export interface LegendaryCalculationResult {
   quantity: number;
@@ -66,15 +77,49 @@ export interface LegendaryCalculationResult {
   grossL5Stations: number;
   grossL1Stations: number;
   ownedL1Equivalent: number;
+  secondaryOwnedL1Equivalent?: number;
   netL1StationsNeeded: number;
-  netL5EquivalentNeeded: number;
+  secondaryNetL1StationsNeeded?: number;
   runesRequired: Partial<Record<RuneType, number>>;
   buffsGranted: {
     timeShards: number;
     maxMana: number;
     maxSlime: number;
     maxDarkness: number;
+    shieldChance: number;
+    resourceGen: number;
+    duplicateChance: number;
   };
+}
+
+export interface GroupBonusResult {
+  group: LegendaryGroup;
+  name: string;
+  isComplete: boolean;
+  baseBonus: number;
+  effectiveBonus: number;
+  members: LegendaryId[];
+  ownedMembers: LegendaryId[];
+}
+
+export interface TimeShardCalculatorState {
+  devourerLevel: number;
+  featTier: number;
+  otherBoostPercent: number;
+  groupUpgradeLevel: number; // The Hacker group multiplier upgrade level
+}
+
+export interface TimeShardCalculationResult {
+  devourerLevel: number;
+  baseShards: number;
+  featTier: number;
+  featBonusPercent: number;
+  legendariesBonusPercent: number;
+  groupsBonusPercent: number;
+  otherBonusPercent: number;
+  totalMultiplier: number;
+  totalTimeShards: number;
+  groups: GroupBonusResult[];
 }
 
 export interface AggregateCalculationResult {
@@ -88,10 +133,14 @@ export interface AggregateCalculationResult {
     maxMana: number;
     maxSlime: number;
     maxDarkness: number;
+    shieldChance: number;
+    resourceGen: number;
+    duplicateChance: number;
   };
   totalLegendariesCount: number;
   totalBaseStationsNeeded: number;
   isAllFulfilled: boolean;
+  timeShardsEstimate: TimeShardCalculationResult;
 }
 
 export interface RuneInfo {
@@ -104,4 +153,5 @@ export interface RuneInfo {
   textClass: string;
   accentGlow: string;
   lightBg: string;
+  imageSrc: string;
 }

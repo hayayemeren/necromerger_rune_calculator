@@ -3,6 +3,7 @@ import { AggregateCalculationResult, RuneType, StashState } from '../types/game'
 import { RUNE_ORDER } from '../data/gameData';
 import { RuneSummaryBadge } from './RuneSummaryBadge';
 import { StatsTracker } from './StatsTracker';
+import { formatNumber } from '../utils/calculator';
 import {
   ShieldCheck,
   ShieldAlert,
@@ -38,30 +39,29 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const { totalRunesGross, totalRunesDeficit, totalRunesSurplus, progressByRune } = aggregate;
 
-  // Total banked runes count
   const totalBankedRunes = Object.values(stash).reduce((sum, val) => sum + (val || 0), 0);
 
   return (
-    <header className="sticky top-0 z-40 bg-slate-950/95 backdrop-blur-xl border-b border-slate-800 shadow-2xl transition-all">
+    <header className="sticky top-0 z-40 bg-slate-950/95 backdrop-blur-md border-b-4 border-slate-800 shadow-2xl transition-all">
       {/* Top Bar: Title & Global Action Controls */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           {/* Logo & Subtitle */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-700 to-indigo-900 border border-purple-500/50 flex items-center justify-center shadow-lg shadow-purple-950/60 shrink-0">
-              <Skull className="w-6 h-6 text-purple-200" />
+            <div className="w-10 h-10 rounded-xl bg-purple-950 border-2 border-purple-500 flex items-center justify-center shadow-pixel shrink-0">
+              <Skull className="w-6 h-6 text-purple-300" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-lg sm:text-xl font-extrabold font-serif tracking-wide text-white">
-                  NecroMerger <span className="text-purple-400 font-sans font-bold text-sm tracking-normal">Calculator</span>
+                <h1 className="font-pixel text-xs sm:text-sm text-white tracking-wider">
+                  NECROMERGER <span className="text-purple-400">CALCULATOR</span>
                 </h1>
-                <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-purple-950 text-purple-300 border border-purple-500/40">
-                  Legendary & Runes
+                <span className="font-pixel text-[8px] uppercase px-1.5 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-500">
+                  ARCADE
                 </span>
               </div>
-              <p className="text-xs text-slate-400 hidden sm:block">
-                Station power scaling, owned offset deductions & time shard projections
+              <p className="text-[11px] text-slate-400 font-mono hidden sm:block">
+                Pixel-accurate station fusing, owned offsets, and live prestige shards
               </p>
             </div>
           </div>
@@ -72,10 +72,10 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               type="button"
               onClick={onToggleGlobalKeepReplacement}
-              className={`text-xs font-semibold px-3 py-2 rounded-xl border transition-all duration-200 flex items-center gap-1.5 shadow-sm ${
+              className={`text-xs font-mono font-bold px-3 py-2 rounded-xl border-2 transition-all flex items-center gap-1.5 shadow-pixel-sm active:translate-y-0.5 ${
                 globalKeepReplacement
-                  ? 'bg-teal-950/90 border-teal-500/60 text-teal-300 shadow-teal-950/50'
-                  : 'bg-slate-900/90 border-slate-700/80 text-slate-400 hover:text-slate-200'
+                  ? 'bg-teal-950 border-teal-400 text-teal-300 shadow-pixel-teal'
+                  : 'bg-slate-900 border-slate-700 text-slate-400 hover:text-slate-200'
               }`}
               title="Toggle keeping 1 replacement spawner (3x L5 instead of 2x L5) for all legendaries"
             >
@@ -85,7 +85,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <ShieldAlert className="w-4 h-4 text-slate-400" />
               )}
               <span>
-                {globalKeepReplacement ? 'Preserve Spawners: ON' : 'Preserve Spawners: OFF'}
+                {globalKeepReplacement ? 'Preserve: ON' : 'Preserve: OFF'}
               </span>
             </button>
 
@@ -93,7 +93,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               type="button"
               onClick={onOpenPresets}
-              className="text-xs font-semibold px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-indigo-300 border border-indigo-500/40 flex items-center gap-1.5 transition-colors shadow-sm"
+              className="text-xs font-mono font-bold px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-indigo-300 border-2 border-indigo-500/60 shadow-pixel-sm flex items-center gap-1.5 active:translate-y-0.5 transition-transform"
             >
               <Bookmark className="w-4 h-4 text-indigo-400" />
               <span>Presets</span>
@@ -103,43 +103,43 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               type="button"
               onClick={() => onOpenStash()}
-              className="text-xs font-semibold px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-amber-300 border border-amber-500/40 flex items-center gap-1.5 transition-colors shadow-sm"
+              className="text-xs font-mono font-bold px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-amber-300 border-2 border-amber-500/60 shadow-pixel-sm flex items-center gap-1.5 active:translate-y-0.5 transition-transform"
             >
               <Coins className="w-4 h-4 text-amber-400" />
               <span>Banked Runes</span>
               {totalBankedRunes > 0 && (
-                <span className="text-[10px] font-mono px-1.5 py-0.2 bg-amber-500/20 text-amber-200 rounded-full">
-                  {totalBankedRunes}
+                <span className="font-pixel text-[8px] px-1.5 py-0.2 bg-amber-500 text-slate-950 rounded">
+                  {formatNumber(totalBankedRunes)}
                 </span>
               )}
             </button>
 
-            {/* How it Works / Guide Button */}
+            {/* Guide Button */}
             <button
               type="button"
               onClick={onOpenGuide}
-              className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-700 transition-colors"
-              title="How legendary station fusing works in NecroMerger"
+              className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border-2 border-slate-700 shadow-pixel-sm transition-transform active:translate-y-0.5"
+              title="Game Guide & Rules"
               aria-label="How it works"
             >
               <HelpCircle className="w-4 h-4" />
             </button>
 
             {/* Reset Menu */}
-            <div className="flex items-center bg-slate-900 border border-slate-700 rounded-xl overflow-hidden">
+            <div className="flex items-center bg-slate-900 border-2 border-slate-700 rounded-xl overflow-hidden shadow-pixel-sm">
               <button
                 type="button"
                 onClick={onResetTargets}
-                className="px-2.5 py-2 text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-                title="Reset targets to 0 (keeps stash & owned stations)"
+                className="px-2.5 py-2 text-xs font-mono font-bold text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                title="Reset targets to 0"
               >
                 Clear Goals
               </button>
               <button
                 type="button"
                 onClick={onResetFull}
-                className="p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-800 border-l border-slate-700 transition-colors"
-                title="Full factory reset"
+                className="p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-800 border-l-2 border-slate-700 transition-colors"
+                title="Full Factory Reset"
                 aria-label="Full Reset"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
@@ -149,18 +149,18 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Live Cumulative Stats Tracker */}
-        <div className="mt-3">
+        <div className="mt-2.5">
           <StatsTracker aggregate={aggregate} />
         </div>
 
         {/* Sticky Rune Summary Badges Grid (All 8 Runes) */}
-        <div className="mt-3 pt-3 border-t border-slate-800/80">
+        <div className="mt-2.5 pt-2.5 border-t-2 border-slate-800">
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+            <span className="font-pixel text-[9px] text-slate-400 tracking-wider uppercase">
               Rune Requirements & Deficits
             </span>
-            <span className="text-[11px] text-slate-500">
-              Click any rune to adjust your banked inventory
+            <span className="text-[10px] text-slate-500 font-mono hidden sm:inline">
+              Click any rune to adjust your banked stash
             </span>
           </div>
 
