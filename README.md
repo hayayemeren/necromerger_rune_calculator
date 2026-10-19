@@ -45,6 +45,91 @@ Follow these steps to plan your merges, optimize rune farming, and maximize Time
 
 ---
 
+## 📥 How to Download and Run (For Users & Developers)
+
+Want to run this calculator on your own computer or deploy it online? Follow this step-by-step setup guide:
+
+### 1. Prerequisites
+Make sure you have the following installed on your machine:
+- **Node.js** (version 18 or newer): [Download Node.js](https://nodejs.org/) (includes `npm`)
+- **Git**: [Download Git](https://git-scm.com/) (optional, if cloning via command line)
+- Any modern web browser (Chrome, Edge, Firefox, Safari, Brave)
+
+---
+
+### 2. Download the Project
+
+#### Option A: Using Git (Fastest & Recommended)
+Open your terminal (macOS/Linux) or Command Prompt / PowerShell (Windows) and run:
+```bash
+# Clone the repository to your machine
+git clone https://github.com/hayayemeren/necromerger_rune_calculator.git
+
+# Move into the project directory
+cd necromerger_rune_calculator
+```
+
+#### Option B: Download as a ZIP Archive
+1. Visit the repository page: [github.com/hayayemeren/necromerger_rune_calculator](https://github.com/hayayemeren/necromerger_rune_calculator).
+2. Click the green **Code** button near the top right and select **Download ZIP**.
+3. Extract the downloaded `.zip` folder on your computer.
+4. Open the extracted folder in your terminal / command prompt.
+
+---
+
+### 3. Install Dependencies
+Run the following command inside the project folder:
+```bash
+npm install
+```
+*This downloads and installs React, Tailwind CSS, Lucide icons, Vite, and all necessary libraries.*
+
+---
+
+### 4. Launch the Local Web App
+Start the local development server:
+```bash
+npm run dev
+```
+After running this command, Vite will display your local address:
+```text
+  VITE ready in 150 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+```
+Now simply open **[http://localhost:5173](http://localhost:5173)** in your browser to start using the calculator! Any changes you make to the code will update instantly via Hot Module Replacement (HMR).
+
+---
+
+### 5. Run the Automated Test Suite
+To verify that all game station calculations, group set formulas, and Time Machine logic pass:
+```bash
+npm test -- --run
+```
+
+---
+
+### 6. Build for Production / Deployment
+To create a fully optimized, static production build ready to host anywhere:
+```bash
+npm run build
+```
+The compiled, minified bundle will be generated in the `dist/` directory. You can preview your production build locally with:
+```bash
+npm run preview
+```
+
+---
+
+### 7. Free One-Click Online Hosting (Share with Other Players)
+You can easily host this calculator online for free so anyone can use it on mobile or desktop without downloading anything:
+- **Vercel (Recommended):** Go to [vercel.com](https://vercel.com/), click "Add New Project", and import your GitHub repository `necromerger_rune_calculator`. Vercel will automatically build and deploy it with a free `*.vercel.app` HTTPS domain.
+- **Netlify:** Go to [netlify.com](https://netlify.com/), import your repository, and set the build command to `npm run build` and publish directory to `dist`.
+- **GitHub Pages:** You can use GitHub Actions to deploy the `dist/` folder directly to GitHub Pages.
+
+---
+
 ## ✨ Key Features
 
 ### 1. Canonical Fusing and Station Math
@@ -165,26 +250,6 @@ necromerger_rune_calculator/
 ├── package.json
 ├── tailwind.config.js
 └── vite.config.ts
-```
-
----
-
-## 🚀 Running the App
-
-### Development Server
-```bash
-npm run dev
-```
-
-### Run Automated Unit Tests
-```bash
-npm test -- --run
-```
-
-### Production Build
-```bash
-npm run build
-npm run preview
 ```
 
 ---
