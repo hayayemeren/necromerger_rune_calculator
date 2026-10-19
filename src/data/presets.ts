@@ -119,7 +119,7 @@ export const PRESETS: PresetDef[] = [
       the_infernal: 0,
     },
     keepReplacement: true,
-    description: 'Unlocks Group 1 (+20%) and Group 2 (+30%) bonuses for a massive +50% group boost.',
+    description: 'Unlocks Group 1 (+20%) and Group 2 (+40%) bonuses for a massive +60% group boost.',
   },
   {
     id: 'alien_tech_t3',
@@ -141,7 +141,7 @@ export const PRESETS: PresetDef[] = [
       the_infernal: 0,
     },
     keepReplacement: true,
-    description: 'Includes the Shield Bot (+10% Shield Chance) and completes Group 3 (+40% Shards).',
+    description: 'Includes the Shield Bot (+10% Shield Chance) and completes Group 3 (+60% Shards).',
   },
   {
     id: 'surgeon_fusions',
@@ -163,7 +163,7 @@ export const PRESETS: PresetDef[] = [
       shield_bot: 0,
     },
     keepReplacement: true,
-    description: 'The 3 Surgeon combination legendaries granting Group 4 bonus (+60% Shards) and +90% individual shard boosts.',
+    description: 'The 3 Surgeon combination legendaries granting Group 4 bonus (+80% Shards) and +120% individual shard boosts.',
   },
   {
     id: 'all_12_legendaries',
@@ -185,6 +185,6 @@ export const PRESETS: PresetDef[] = [
       the_infernal: 1,
     },
     keepReplacement: true,
-    description: 'Activates all 4 Legendary Groups (+150% group bonus) plus all 12 individual boosts (+240% Shards).',
+    description: 'Activates all 4 Legendary Groups (+200% group bonus) plus all 12 individual boosts (+300% Shards).',
   },
 ];

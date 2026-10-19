@@ -21,6 +21,7 @@ interface HeaderProps {
   onToggleGlobalKeepReplacement: () => void;
   onOpenPresets: () => void;
   onOpenStash: (runeFocus?: RuneType) => void;
+  onOpenLairLegendaries: () => void;
   onResetTargets: () => void;
   onResetFull: () => void;
   onOpenGuide: () => void;
@@ -33,6 +34,7 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleGlobalKeepReplacement,
   onOpenPresets,
   onOpenStash,
+  onOpenLairLegendaries,
   onResetTargets,
   onResetFull,
   onOpenGuide,
@@ -40,6 +42,7 @@ export const Header: React.FC<HeaderProps> = ({
   const { totalRunesGross, totalRunesDeficit, totalRunesSurplus, progressByRune } = aggregate;
 
   const totalBankedRunes = Object.values(stash).reduce((sum, val) => sum + (val || 0), 0);
+  const totalInLair = aggregate.totalLairLegendariesCount || 0;
 
   return (
     <header className="sticky top-0 z-40 bg-slate-950/95 backdrop-blur-md border-b-4 border-slate-800 shadow-2xl transition-all">
@@ -89,14 +92,20 @@ export const Header: React.FC<HeaderProps> = ({
               </span>
             </button>
 
-            {/* Quick Presets */}
+            {/* In Lair Minions Drawer Toggle */}
             <button
               type="button"
-              onClick={onOpenPresets}
-              className="text-xs font-mono font-bold px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-indigo-300 border-2 border-indigo-500/60 shadow-pixel-sm flex items-center gap-1.5 active:translate-y-0.5 transition-transform"
+              onClick={onOpenLairLegendaries}
+              className="text-xs font-mono font-bold px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-purple-300 border-2 border-purple-500/60 shadow-pixel-sm flex items-center gap-1.5 active:translate-y-0.5 transition-transform"
+              title="View or input minions already on your lair board (0 runes cost)"
             >
-              <Bookmark className="w-4 h-4 text-indigo-400" />
-              <span>Presets</span>
+              <Skull className="w-4 h-4 text-purple-400" />
+              <span>In Lair</span>
+              {totalInLair > 0 && (
+                <span className="font-pixel text-[8px] px-1.5 py-0.2 bg-purple-500 text-slate-950 rounded font-bold">
+                  {totalInLair}
+                </span>
+              )}
             </button>
 
             {/* Banked Runes Drawer Toggle */}
@@ -112,6 +121,16 @@ export const Header: React.FC<HeaderProps> = ({
                   {formatNumber(totalBankedRunes)}
                 </span>
               )}
+            </button>
+
+            {/* Quick Presets */}
+            <button
+              type="button"
+              onClick={onOpenPresets}
+              className="text-xs font-mono font-bold px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-indigo-300 border-2 border-indigo-500/60 shadow-pixel-sm flex items-center gap-1.5 active:translate-y-0.5 transition-transform"
+            >
+              <Bookmark className="w-4 h-4 text-indigo-400" />
+              <span>Presets</span>
             </button>
 
             {/* Guide Button */}

@@ -80,8 +80,8 @@ export const GuideModal: React.FC<GuideModalProps> = ({ isOpen, onClose }) => {
               2. Keep +1 Replacement Spawner
             </h3>
             <p className="text-slate-300">
-              Merging a standard legendary consumes <strong>two Level 5 stations</strong> (32 Level 1 base).
-              Enabling *"Keep Replacement"* crafts <strong>3× Level 5 stations</strong> (48 Level 1 base), leaving 1 active spawner in your lair so resource generation doesn't grind to a halt.
+              Merging a standard legendary consumes <strong>two Level 5 stations</strong> (32 Level 1 base, or 2× L2 for Soul Stalker = 4 L1 base).
+              Enabling *"Keep Replacement"* crafts <strong>3 stations</strong> (48 Level 1 base, or 6 L1 base for Soul Stalker), leaving 1 active spawner in your lair so resource generation doesn't grind to a halt.
             </p>
           </div>
 
@@ -96,13 +96,13 @@ export const GuideModal: React.FC<GuideModalProps> = ({ isOpen, onClose }) => {
             </p>
             <ul className="space-y-1.5 text-[11px]">
               <li className="bg-slate-900 p-2 rounded border border-slate-800">
-                <strong className="text-indigo-300">The Cursed:</strong> Fused from 1× Lich + 1× Reaper (2× L5 Grave + 2× L5 Lectern). Grants +20% resource gen & +30% Time Shards.
+                <strong className="text-indigo-300">The Cursed:</strong> Fused from 1× Lich + 1× Reaper (2× L5 Grave + 2× L5 Lectern = 2,240 Ice + 640 Moon). Grants +20% resource gen & +40% Time Shards (Max 1).
               </li>
               <li className="bg-slate-900 p-2 rounded border border-slate-800">
-                <strong className="text-lime-300">The Colossus:</strong> Fused from 1× Gorgon + 1× Cyclops (2× L5 Cupboard + 2× L5 Fridge). Grants combat food generation & +30% Time Shards.
+                <strong className="text-lime-300">The Colossus:</strong> Fused from 1× Gorgon + 1× Cyclops (2× L5 Cupboard + 2× L5 Fridge = 2,240 Poison + 640 Moon). Grants combat food generation & +40% Time Shards (Max 1).
               </li>
               <li className="bg-slate-900 p-2 rounded border border-slate-800">
-                <strong className="text-rose-300">The Infernal:</strong> Fused from 1× Harpy + 1× Archdemon (2× L5 Altar + 2× L5 Portal). Grants 5% duplicate minion chance & +30% Time Shards.
+                <strong className="text-rose-300">The Infernal:</strong> Fused from 1× Harpy + 1× Archdemon (2× L5 Altar + 2× L5 Portal = 1,600 Blood + 960 Death). Grants 5% duplicate minion chance & +40% Time Shards (Max 1).
               </li>
             </ul>
           </div>
@@ -117,14 +117,17 @@ export const GuideModal: React.FC<GuideModalProps> = ({ isOpen, onClose }) => {
               Formula:
               <br />
               <code className="text-amber-300 font-bold">
-                Base(Lvl) × (1 + Feats%) × (1 + Legendaries% + Groups%) × (1 + Other%)
+                Base(Lvl) × (Feats% / 100) × (Legendaries & Sets% / 100) × (Other% / 100)
               </code>
             </p>
-            <ul className="space-y-1 text-[11px] text-slate-300">
-              <li>• <strong>Devourer Base:</strong> Unlocks at Lvl 35 (150 shards), scales up to Lvl 100 (15,000 shards).</li>
-              <li>• <strong>Feats:</strong> +10% multiplier per completed Tier (up to Tier 22 = +220%).</li>
-              <li>• <strong>Groups:</strong> Group 1 (+20%), Group 2 (+30%), Group 3 (+40%), Group 4 (+60%).</li>
-              <li>• <strong>Hacker Upgrade:</strong> Scales group bonus by (1 + upgradeLevel).</li>
+            <ul className="space-y-1.5 text-[11px] text-slate-300">
+              <li>• <strong>Devourer Base:</strong> Unlocks at Lvl 35 (150 shards), scales up to Lvl 1000 (3,200,000 shards).</li>
+              <li>• <strong>Feats:</strong> Base 100% + 10% per completed Tier (e.g. Feat 29 = 390%, or 3.9x).</li>
+              <li>• <strong>Legendaries & Sets:</strong> Starts with a <strong>Base 100%</strong>. Minions and set bonuses add on top (e.g. 100% base + 335% minions + 140% sets = 575%, or 5.75x).</li>
+              <li>• <strong>Individual Legendaries:</strong> 1st grants full (Lich/Gorgon/Harpy: 10%, Reaper/Cyclops/Archdemon/Robo: 20%, Shield Bot: 30%, Soul Stalker: 40%, Fusions: 40%); duplicates grant half.</li>
+              <li>• <strong>In Lair Minions:</strong> Minions already active in your lair cost <strong>0 runes</strong>, but fully grant their shard bonuses and complete sets!</li>
+              <li>• <strong>Legendary Groups:</strong> Group 1 (+20%), Group 2 (+40%), Group 3 (+60%), Group 4 (+80%).</li>
+              <li>• <strong>Hacker Group Upgrade:</strong> Allows claiming duplicate completed sets (up to 1 + upgrade level). Example: 3 Lich, 3 Gorgon, 3 Harpy with Upgrade Lvl 2 gives 3 × 20% = 60%, but 2 Lich, 3 Gorgon, 3 Harpy only gives 2 × 20% = 40%!</li>
             </ul>
           </div>
         </div>

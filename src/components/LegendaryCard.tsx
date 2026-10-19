@@ -21,7 +21,6 @@ import {
   Moon,
   ShieldCheck,
   RotateCcw,
-  Layers,
   Shield,
   Utensils,
   Copy,
@@ -35,6 +34,9 @@ interface LegendaryCardProps {
   onSetQuantity: (quantity: number) => void;
   onIncrement: () => void;
   onDecrement: () => void;
+  onSetLairQuantity: (quantity: number) => void;
+  onIncrementLairQuantity: () => void;
+  onDecrementLairQuantity: () => void;
   onToggleKeepReplacement: (keep: boolean) => void;
   onSetOwnedStation: (level: StationLevel, count: number) => void;
   onSetSecondaryOwnedStation?: (level: StationLevel, count: number) => void;
@@ -48,6 +50,9 @@ export const LegendaryCard: React.FC<LegendaryCardProps> = ({
   onSetQuantity,
   onIncrement,
   onDecrement,
+  onSetLairQuantity,
+  onIncrementLairQuantity,
+  onDecrementLairQuantity,
   onToggleKeepReplacement,
   onSetOwnedStation,
   onSetSecondaryOwnedStation,
@@ -58,6 +63,8 @@ export const LegendaryCard: React.FC<LegendaryCardProps> = ({
 
   const { quantity, keepReplacement, ownedStations, secondaryOwnedStations } = state;
   const {
+    lairQuantity,
+    totalBoardQuantity,
     grossL5Stations,
     grossL1Stations,
     ownedL1Equivalent,
@@ -67,7 +74,7 @@ export const LegendaryCard: React.FC<LegendaryCardProps> = ({
     runesRequired,
   } = calculation;
 
-  const isSelected = quantity > 0;
+  const isSelected = totalBoardQuantity > 0;
 
   return (
     <div
@@ -110,7 +117,9 @@ export const LegendaryCard: React.FC<LegendaryCardProps> = ({
                   <span className="font-bold text-slate-200">{def.secondaryStationName}</span>
                 </>
               )}
-              <span className="text-[10px] text-slate-500">(Tier L5)</span>
+              <span className="text-[10px] text-slate-500">
+                (Tier L{def.requiredStationLevel || 5})
+              </span>
             </div>
 
             {/* Combination Recipe Banner */}
@@ -126,6 +135,11 @@ export const LegendaryCard: React.FC<LegendaryCardProps> = ({
               <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold text-amber-300 bg-amber-950/70 border border-amber-500/40 px-2 py-0.5 rounded">
                 <Sparkles className="w-3 h-3 text-amber-400" />
                 +{def.buffs.timeShards}% Shards
+                {def.buffs.subsequentTimeShards && (
+                  <span className="text-[8px] text-amber-400/80 font-normal">
+                    (+{def.buffs.subsequentTimeShards}% dupe)
+                  </span>
+                )}
               </span>
 
               {def.buffs.maxMana && (
@@ -146,6 +160,20 @@ export const LegendaryCard: React.FC<LegendaryCardProps> = ({
                 <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold text-purple-300 bg-purple-950/70 border border-purple-500/40 px-2 py-0.5 rounded">
                   <Moon className="w-3 h-3 text-purple-400" />
                   +{def.buffs.maxDarkness}% Darkness
+                </span>
+              )}
+
+              {def.buffs.levelSkipChance && (
+                <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold text-rose-300 bg-rose-950/70 border border-rose-500/40 px-2 py-0.5 rounded">
+                  <Sparkles className="w-3 h-3 text-rose-400" />
+                  +{def.buffs.levelSkipChance}% Level Skip
+                </span>
+              )}
+
+              {def.buffs.stationSpeedBonus && (
+                <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold text-orange-300 bg-orange-950/70 border border-orange-500/40 px-2 py-0.5 rounded">
+                  <RotateCcw className="w-3 h-3 text-orange-400" />
+                  +{def.buffs.stationSpeedBonus}% Grinder Spd
                 </span>
               )}
 
@@ -182,44 +210,113 @@ export const LegendaryCard: React.FC<LegendaryCardProps> = ({
 
         {/* Target Stepper & Replacement Toggle */}
         <div className="bg-slate-950 rounded-xl p-3 border-2 border-slate-800 mb-3 space-y-2.5">
-          <div className="flex items-center justify-between gap-3">
-            <span className="font-pixel text-[9px] text-slate-300 flex items-center gap-1.5 uppercase">
-              <Layers className="w-3.5 h-3.5 text-indigo-400" />
-              Target Goals
-            </span>
+          {/* Header with Board Total & Max */}
+          <div className="flex items-center justify-between gap-2 pb-2 border-b border-slate-800">
+            <div className="flex items-center gap-1.5">
+              <span className="font-pixel text-[9px] text-slate-300 uppercase">
+                Board Minions
+              </span>
+              {def.maxQuantity !== undefined && (
+                <span className="text-[8px] font-pixel px-1.5 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-500/40 font-bold">
+                  MAX: {def.maxQuantity}
+                </span>
+              )}
+            </div>
+            <div className="font-pixel text-[10px] text-teal-300">
+              Total: {totalBoardQuantity} {def.maxQuantity !== undefined ? `/ ${def.maxQuantity}` : ''}
+            </div>
+          </div>
 
-            {/* Retro pixel stepper */}
-            <div className="inline-flex items-center bg-slate-900 border-2 border-slate-700 rounded-lg overflow-hidden shadow-pixel-sm">
+          {/* Stepper 1: In Lair (Already Built - 0 Runes) */}
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <div className="font-pixel text-[9px] text-purple-300 flex items-center gap-1">
+                In Lair (Active)
+              </div>
+              <div className="text-[9px] text-slate-400 font-mono">
+                Already built (0 runes)
+              </div>
+            </div>
+
+            <div className="inline-flex items-center bg-slate-900 border-2 border-purple-500/50 rounded-lg overflow-hidden shadow-pixel-sm">
               <button
                 type="button"
-                onClick={onDecrement}
-                disabled={quantity <= 0}
-                className="w-8 h-8 flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-800 disabled:opacity-30 disabled:hover:bg-transparent font-pixel text-xs active:translate-y-0.5 transition-transform"
-                aria-label={`Decrease ${def.name} target`}
+                onClick={onDecrementLairQuantity}
+                disabled={lairQuantity <= 0}
+                className="w-7 h-7 flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-800 disabled:opacity-30 disabled:hover:bg-transparent font-pixel text-xs active:translate-y-0.5 transition-transform"
+                aria-label={`Decrease ${def.name} in lair`}
               >
-                <Minus className="w-3.5 h-3.5" />
+                <Minus className="w-3 h-3" />
               </button>
 
               <input
                 type="number"
                 min="0"
-                max="99"
+                max={def.maxQuantity ?? 99}
+                value={lairQuantity}
+                onChange={(e) => {
+                  const val = parseInt(e.target.value, 10);
+                  onSetLairQuantity(isNaN(val) ? 0 : val);
+                }}
+                className="w-10 h-7 text-center bg-transparent font-pixel text-xs text-purple-300 focus:outline-none focus:bg-slate-800/50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none font-bold"
+                aria-label={`${def.name} in lair`}
+              />
+
+              <button
+                type="button"
+                onClick={onIncrementLairQuantity}
+                disabled={def.maxQuantity !== undefined && totalBoardQuantity >= def.maxQuantity}
+                className="w-7 h-7 flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-800 disabled:opacity-30 disabled:hover:bg-transparent font-pixel text-xs active:translate-y-0.5 transition-transform"
+                aria-label={`Increase ${def.name} in lair`}
+              >
+                <Plus className="w-3 h-3" />
+              </button>
+            </div>
+          </div>
+
+          {/* Stepper 2: To Craft (Calculates Station & Rune Requirements) */}
+          <div className="flex items-center justify-between gap-2 pt-2 border-t border-slate-800/80">
+            <div>
+              <div className="font-pixel text-[9px] text-teal-300 flex items-center gap-1">
+                To Summon (Craft)
+              </div>
+              <div className="text-[9px] text-slate-400 font-mono">
+                Calculates runes
+              </div>
+            </div>
+
+            <div className="inline-flex items-center bg-slate-900 border-2 border-teal-500/50 rounded-lg overflow-hidden shadow-pixel-sm">
+              <button
+                type="button"
+                onClick={onDecrement}
+                disabled={quantity <= 0}
+                className="w-7 h-7 flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-800 disabled:opacity-30 disabled:hover:bg-transparent font-pixel text-xs active:translate-y-0.5 transition-transform"
+                aria-label={`Decrease ${def.name} target to craft`}
+              >
+                <Minus className="w-3 h-3" />
+              </button>
+
+              <input
+                type="number"
+                min="0"
+                max={def.maxQuantity ?? 99}
                 value={quantity}
                 onChange={(e) => {
                   const val = parseInt(e.target.value, 10);
                   onSetQuantity(isNaN(val) ? 0 : val);
                 }}
-                className="w-12 h-8 text-center bg-transparent font-pixel text-xs text-white focus:outline-none focus:bg-slate-800/50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                aria-label={`${def.name} target quantity`}
+                className="w-10 h-7 text-center bg-transparent font-pixel text-xs text-white focus:outline-none focus:bg-slate-800/50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none font-bold"
+                aria-label={`${def.name} target quantity to craft`}
               />
 
               <button
                 type="button"
                 onClick={onIncrement}
-                className="w-8 h-8 flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-800 font-pixel text-xs active:translate-y-0.5 transition-transform"
-                aria-label={`Increase ${def.name} target`}
+                disabled={def.maxQuantity !== undefined && totalBoardQuantity >= def.maxQuantity}
+                className="w-7 h-7 flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-800 disabled:opacity-30 disabled:hover:bg-transparent font-pixel text-xs active:translate-y-0.5 transition-transform"
+                aria-label={`Increase ${def.name} target to craft`}
               >
-                <Plus className="w-3.5 h-3.5" />
+                <Plus className="w-3 h-3" />
               </button>
             </div>
           </div>
@@ -263,9 +360,12 @@ export const LegendaryCard: React.FC<LegendaryCardProps> = ({
         {/* Station Math Summary Row */}
         <div className="grid grid-cols-3 gap-2 text-center bg-slate-950/70 rounded-xl p-2.5 border-2 border-slate-800 mb-3 text-xs">
           <div>
-            <div className="text-[9px] uppercase text-slate-400 font-pixel">Gross L5/L1</div>
+            <div className="text-[9px] uppercase text-slate-400 font-pixel">
+              Gross L{def.requiredStationLevel || 5}/L1
+            </div>
             <div className="font-mono font-bold text-slate-200 mt-0.5">
-              {grossL5Stations} L5 <span className="text-slate-400 font-normal">({grossL1Stations})</span>
+              {grossL5Stations} L{def.requiredStationLevel || 5}{' '}
+              <span className="text-slate-400 font-normal">({grossL1Stations})</span>
             </div>
           </div>
 

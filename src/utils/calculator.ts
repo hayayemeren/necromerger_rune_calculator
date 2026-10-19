@@ -60,85 +60,83 @@ export function decomposeL1ToStations(l1Count: number): Record<StationLevel, num
 
 /**
  * Calculates station and rune requirements for a single legendary.
- * Supports standard legendaries and dual-station combination legendaries.
+ * Supports standard legendaries, Soul Stalker (Tier 2 Soul Grinder), and dual-station combination legendaries.
  */
 export function calculateLegendaryResult(
   def: LegendaryDef,
-  state: LegendaryState
+  state: LegendaryState,
+  lairQuantity: number = 0
 ): LegendaryCalculationResult {
-  const quantity = Math.max(0, state.quantity);
+  const quantity = Math.max(0, state.quantity); // Target to craft
+  const lairQty = Math.max(0, lairQuantity); // Already in lair (costs 0 runes)
+  const totalBoardQuantity = quantity + lairQty;
   const keepReplacement = state.keepReplacement;
 
-  if (quantity === 0) {
-    return {
-      quantity: 0,
-      keepReplacement,
-      grossL5Stations: 0,
-      grossL1Stations: 0,
-      ownedL1Equivalent: calculateOwnedL1(state.ownedStations),
-      secondaryOwnedL1Equivalent: def.isCombination
-        ? calculateOwnedL1(state.secondaryOwnedStations || INITIAL_OWNED_STATIONS)
-        : undefined,
-      netL1StationsNeeded: 0,
-      secondaryNetL1StationsNeeded: def.isCombination ? 0 : undefined,
-      runesRequired: {},
-      buffsGranted: {
-        timeShards: 0,
-        maxMana: 0,
-        maxSlime: 0,
-        maxDarkness: 0,
-        shieldChance: 0,
-        resourceGen: 0,
-        duplicateChance: 0,
-      },
-    };
-  }
-
-  // Gross L5 needed: 2 per legendary + 1 replacement spawner if requested
-  const grossL5Stations = keepReplacement ? 2 * quantity + 1 : 2 * quantity;
-  const grossL1Stations = grossL5Stations * 16;
-
+  let grossL5Stations = 0;
+  let grossL1Stations = 0;
   const ownedL1Equivalent = calculateOwnedL1(state.ownedStations);
-  const netL1StationsNeeded = Math.max(0, grossL1Stations - ownedL1Equivalent);
-
+  const secondaryOwnedL1Equivalent = def.isCombination
+    ? calculateOwnedL1(state.secondaryOwnedStations || INITIAL_OWNED_STATIONS)
+    : undefined;
+  let netL1StationsNeeded = 0;
+  let secondaryNetL1StationsNeeded = def.isCombination ? 0 : undefined;
   const runesRequired: Partial<Record<RuneType, number>> = {};
 
-  // Primary Station Runes
-  for (const [rune, baseCost] of Object.entries(def.baseL1Cost) as [RuneType, number][]) {
-    runesRequired[rune] = (runesRequired[rune] || 0) + netL1StationsNeeded * baseCost;
-  }
+  // Station and rune calculations are strictly for minions to craft (quantity)
+  if (quantity > 0) {
+    const reqStationLevel = def.requiredStationLevel || 5;
+    const l1PerStation = stationLevelToL1(reqStationLevel);
 
-  // Secondary Station Runes (if Combination Legendary like The Cursed, The Colossus, The Infernal)
-  let secondaryOwnedL1Equivalent: number | undefined;
-  let secondaryNetL1StationsNeeded: number | undefined;
+    // Gross stations needed: 2 per legendary + 1 replacement spawner if requested
+    grossL5Stations = keepReplacement ? 2 * quantity + 1 : 2 * quantity;
+    grossL1Stations = grossL5Stations * l1PerStation;
+    netL1StationsNeeded = Math.max(0, grossL1Stations - ownedL1Equivalent);
 
-  if (def.isCombination && def.secondaryBaseL1Cost) {
-    secondaryOwnedL1Equivalent = calculateOwnedL1(
-      state.secondaryOwnedStations || INITIAL_OWNED_STATIONS
-    );
-    secondaryNetL1StationsNeeded = Math.max(0, grossL1Stations - secondaryOwnedL1Equivalent);
+    // Primary Station Runes
+    for (const [rune, baseCost] of Object.entries(def.baseL1Cost) as [RuneType, number][]) {
+      runesRequired[rune] = (runesRequired[rune] || 0) + netL1StationsNeeded * baseCost;
+    }
 
-    for (const [rune, baseCost] of Object.entries(def.secondaryBaseL1Cost) as [
-      RuneType,
-      number,
-    ][]) {
-      runesRequired[rune] =
-        (runesRequired[rune] || 0) + secondaryNetL1StationsNeeded * baseCost;
+    // Secondary Station Runes (if Combination Legendary like The Cursed, The Colossus, The Infernal)
+    if (def.isCombination && def.secondaryBaseL1Cost) {
+      const secondaryGrossL1Stations = grossL5Stations * 16;
+      secondaryNetL1StationsNeeded = Math.max(
+        0,
+        secondaryGrossL1Stations - (secondaryOwnedL1Equivalent || 0)
+      );
+
+      for (const [rune, baseCost] of Object.entries(def.secondaryBaseL1Cost) as [
+        RuneType,
+        number,
+      ][]) {
+        runesRequired[rune] =
+          (runesRequired[rune] || 0) + secondaryNetL1StationsNeeded * baseCost;
+      }
     }
   }
 
+  // Buffs are calculated based on total minions on board at prestige: totalBoardQuantity
+  const timeShardBonus =
+    totalBoardQuantity === 0
+      ? 0
+      : def.buffs.subsequentTimeShards !== undefined && totalBoardQuantity > 1
+      ? def.buffs.timeShards + (totalBoardQuantity - 1) * def.buffs.subsequentTimeShards
+      : (def.buffs.timeShards || 0) * totalBoardQuantity;
+
   const buffsGranted = {
-    timeShards: (def.buffs.timeShards || 0) * quantity,
-    maxMana: (def.buffs.maxMana || 0) * quantity,
-    maxSlime: (def.buffs.maxSlime || 0) * quantity,
-    maxDarkness: (def.buffs.maxDarkness || 0) * quantity,
-    shieldChance: (def.buffs.shieldChance || 0) * quantity,
-    resourceGen: (def.buffs.resourceGen || 0) * quantity,
-    duplicateChance: (def.buffs.duplicateChance || 0) * quantity,
+    timeShards: timeShardBonus,
+    maxMana: (def.buffs.maxMana || 0) * totalBoardQuantity,
+    maxSlime: (def.buffs.maxSlime || 0) * totalBoardQuantity,
+    maxDarkness: (def.buffs.maxDarkness || 0) * totalBoardQuantity,
+    shieldChance: (def.buffs.shieldChance || 0) * totalBoardQuantity,
+    resourceGen: (def.buffs.resourceGen || 0) * totalBoardQuantity,
+    duplicateChance: (def.buffs.duplicateChance || 0) * totalBoardQuantity,
   };
 
   return {
     quantity,
+    lairQuantity: lairQty,
+    totalBoardQuantity,
     keepReplacement,
     grossL5Stations,
     grossL1Stations,
@@ -152,13 +150,27 @@ export function calculateLegendaryResult(
 }
 
 /**
- * Interpolates base Time Shards from Devourer Level (35 to 100).
+ * Interpolates base Time Shards from Devourer Level (35 up to 1000).
  */
 export function getDevourerBaseShards(level: number): number {
   if (level < 35) return 0;
-  if (level >= 100) return 15000;
 
-  const milestones = [35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100];
+  const milestones = Object.keys(DEVOURER_BASE_SHARDS_TABLE)
+    .map(Number)
+    .sort((a, b) => a - b);
+
+  const minLevel = milestones[0];
+  const maxLevel = milestones[milestones.length - 1]; // 1000
+
+  if (level <= minLevel) {
+    return DEVOURER_BASE_SHARDS_TABLE[minLevel];
+  }
+
+  if (level >= maxLevel) {
+    return DEVOURER_BASE_SHARDS_TABLE[maxLevel];
+  }
+
+  // Find surrounding milestones and interpolate linearly
   for (let i = 0; i < milestones.length - 1; i++) {
     const low = milestones[i];
     const high = milestones[i + 1];
@@ -169,23 +181,28 @@ export function getDevourerBaseShards(level: number): number {
       return Math.round(lowVal + fraction * (highVal - lowVal));
     }
   }
-  return 15000;
+
+  return DEVOURER_BASE_SHARDS_TABLE[maxLevel];
 }
 
 /**
  * Calculates Time Shards based on Devourer level, Feat tier, Legendaries, Groups, and Other boosts.
+ * Feat boost has a base of 100% and increases by +10% for every completed feat (e.g. 29 feats = 390% -> 3.9x).
+ * Legendaries and Sets starts with base 100%, and added legendaries + groups come on top of it.
+ * Other multiplier is the total percentage from the game (e.g. 240% -> 2.4x).
  */
 export function calculateTimeShards(
   timeShardState: TimeShardCalculatorState,
   legendariesBonusPercent: number,
   activeLegendaries: Record<LegendaryId, number>
 ): TimeShardCalculationResult {
-  const devourerLevel = Math.max(1, Math.min(100, Math.floor(timeShardState.devourerLevel)));
+  const devourerLevel = Math.max(1, Math.min(1000, Math.floor(timeShardState.devourerLevel)));
   const baseShards = getDevourerBaseShards(devourerLevel);
 
-  const featTier = Math.max(0, Math.min(22, Math.floor(timeShardState.featTier)));
-  // Each completed Feat tier gives +10%
-  const featBonusPercent = featTier * 10;
+  // Base is 100%, and each completed Feat gives +10% (e.g. 29 completed feats = 100 + 29*10 = 390% -> 3.9x multiplier)
+  const featTier = Math.max(0, Math.min(50, Math.floor(timeShardState.featTier)));
+  const featBonusPercent = 100 + featTier * 10;
+  const featMult = featBonusPercent / 100;
 
   // Evaluate Legendary Groups
   const groupResults: GroupBonusResult[] = [];
@@ -197,12 +214,16 @@ export function calculateTimeShards(
     { name: string; baseBonus: number; members: LegendaryId[] },
   ][]) {
     const ownedMembers = groupDef.members.filter((m) => (activeLegendaries[m] || 0) > 0);
-    const isComplete = ownedMembers.length === groupDef.members.length;
+    const memberCounts = groupDef.members.map((m) => activeLegendaries[m] || 0);
+    const completeSets = Math.min(...memberCounts);
+    const isComplete = completeSets > 0;
 
-    // Upgrades scale group bonus: base * (1 + upgradeLevel)
-    const effectiveBonus = isComplete ? groupDef.baseBonus * (1 + upgradeLevel) : 0;
+    // Upgrades allow claiming multiple completed sets: up to (1 + upgradeLevel) sets
+    const maxClaimableSets = 1 + upgradeLevel;
+    const claimedSets = isComplete ? Math.min(completeSets, maxClaimableSets) : 0;
+    const effectiveBonus = claimedSets * groupDef.baseBonus;
 
-    if (isComplete) {
+    if (claimedSets > 0) {
       totalGroupsBonus += effectiveBonus;
     }
 
@@ -210,6 +231,8 @@ export function calculateTimeShards(
       group: groupId,
       name: groupDef.name,
       isComplete,
+      completeSets,
+      claimedSets,
       baseBonus: groupDef.baseBonus,
       effectiveBonus,
       members: groupDef.members,
@@ -217,14 +240,19 @@ export function calculateTimeShards(
     });
   }
 
-  const otherBonusPercent = Math.max(0, timeShardState.otherBoostPercent);
+  // Legendaries and sets starts with 100 percent base, and added legendaries come on top of it:
+  // e.g. 100% + 335% (individual) + 140% (groups) = 575% -> 5.75x multiplier
+  const totalLegendariesAndGroupsPercent = 100 + legendariesBonusPercent + totalGroupsBonus;
+  const legAndGroupMult = totalLegendariesAndGroupsPercent / 100;
+
+  // Other: Total Other % from the game's Time Machine screen (e.g. 240% -> 2.4x)
+  // If <= 0, default to baseline 100% (1.0x)
+  const rawOther = timeShardState.otherBoostPercent;
+  const otherPercent = rawOther && rawOther > 0 ? rawOther : 100;
+  const otherMult = otherPercent / 100;
 
   // Multiplicative formula across categories:
-  // Base * (1 + Feats%) * (1 + (Legendaries% + Groups%)) * (1 + Other%)
-  const featMult = 1 + featBonusPercent / 100;
-  const legAndGroupMult = 1 + (legendariesBonusPercent + totalGroupsBonus) / 100;
-  const otherMult = 1 + otherBonusPercent / 100;
-
+  // Base * (Feats% / 100) * (Legendaries & Sets% / 100) * (Other% / 100)
   const totalMultiplier = featMult * legAndGroupMult * otherMult;
   const totalTimeShards = Math.floor(baseShards * totalMultiplier);
 
@@ -235,7 +263,8 @@ export function calculateTimeShards(
     featBonusPercent,
     legendariesBonusPercent,
     groupsBonusPercent: totalGroupsBonus,
-    otherBonusPercent,
+    totalLegendariesAndGroupsPercent,
+    otherBonusPercent: otherPercent,
     totalMultiplier,
     totalTimeShards,
     groups: groupResults,
@@ -249,7 +278,8 @@ export function calculateAggregate(
   definitions: Record<LegendaryId, LegendaryDef>,
   states: Record<LegendaryId, LegendaryState>,
   stash: StashState,
-  timeShardState: TimeShardCalculatorState
+  timeShardState: TimeShardCalculatorState,
+  lairLegendaries: Record<LegendaryId, number> = {} as Record<LegendaryId, number>
 ): AggregateCalculationResult {
   const byLegendary = {} as Record<LegendaryId, LegendaryCalculationResult>;
   const activeLegendaryCounts = {} as Record<LegendaryId, number>;
@@ -276,20 +306,25 @@ export function calculateAggregate(
   };
 
   let totalLegendariesCount = 0;
+  let totalLairLegendariesCount = 0;
+  let totalBoardLegendariesCount = 0;
   let totalBaseStationsNeeded = 0;
 
   for (const id of Object.keys(definitions) as LegendaryId[]) {
     const def = definitions[id];
     const state = states[id];
-    const result = calculateLegendaryResult(def, state);
+    const lairQty = lairLegendaries[id] || 0;
+    const result = calculateLegendaryResult(def, state, lairQty);
     byLegendary[id] = result;
-    activeLegendaryCounts[id] = result.quantity;
+    activeLegendaryCounts[id] = result.totalBoardQuantity;
 
     totalLegendariesCount += result.quantity;
+    totalLairLegendariesCount += lairQty;
+    totalBoardLegendariesCount += result.totalBoardQuantity;
     totalBaseStationsNeeded +=
       result.netL1StationsNeeded + (result.secondaryNetL1StationsNeeded || 0);
 
-    // Accumulate buffs
+    // Accumulate buffs (from total minions on board)
     totalBuffs.timeShards += result.buffsGranted.timeShards;
     totalBuffs.maxMana += result.buffsGranted.maxMana;
     totalBuffs.maxSlime += result.buffsGranted.maxSlime;
@@ -298,7 +333,7 @@ export function calculateAggregate(
     totalBuffs.resourceGen += result.buffsGranted.resourceGen;
     totalBuffs.duplicateChance += result.buffsGranted.duplicateChance;
 
-    // Accumulate runes
+    // Accumulate runes (only for minions to craft)
     for (const [rune, amt] of Object.entries(result.runesRequired) as [RuneType, number][]) {
       totalRunesGross[rune] += amt || 0;
     }
@@ -376,6 +411,8 @@ export function calculateAggregate(
     progressByRune,
     totalBuffs,
     totalLegendariesCount,
+    totalLairLegendariesCount,
+    totalBoardLegendariesCount,
     totalBaseStationsNeeded,
     isAllFulfilled,
     timeShardsEstimate,

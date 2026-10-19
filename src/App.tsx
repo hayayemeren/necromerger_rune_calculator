@@ -5,13 +5,15 @@ import { Header } from './components/Header';
 import { LegendaryCard } from './components/LegendaryCard';
 import { TimeMachineCalculator } from './components/TimeMachineCalculator';
 import { RuneStashDrawer } from './components/RuneStashDrawer';
+import { LairLegendariesDrawer } from './components/LairLegendariesDrawer';
 import { PresetSelector } from './components/PresetSelector';
 import { GuideModal } from './components/GuideModal';
-import { Coins, Filter, HelpCircle, Layers } from 'lucide-react';
+import { Coins, Filter, HelpCircle, Layers, Skull } from 'lucide-react';
 
 export const App: React.FC = () => {
   const {
     legendaries,
+    lairLegendaries,
     stash,
     globalKeepReplacement,
     timeShardState,
@@ -19,6 +21,10 @@ export const App: React.FC = () => {
     setQuantity,
     incrementQuantity,
     decrementQuantity,
+    setLairQuantity,
+    incrementLairQuantity,
+    decrementLairQuantity,
+    clearLairLegendaries,
     setKeepReplacement,
     setGlobalKeepReplacement,
     setOwnedStation,
@@ -39,6 +45,7 @@ export const App: React.FC = () => {
 
   const [isPresetsOpen, setIsPresetsOpen] = useState<boolean>(false);
   const [isStashOpen, setIsStashOpen] = useState<boolean>(false);
+  const [isLairDrawerOpen, setIsLairDrawerOpen] = useState<boolean>(false);
   const [isGuideOpen, setIsGuideOpen] = useState<boolean>(false);
 
   // Filter state for cards
@@ -46,9 +53,13 @@ export const App: React.FC = () => {
     'all' | 'active' | 'undead' | 'unholy' | 'alien' | 'fusion'
   >('all');
 
+  const craftQuantities = Object.fromEntries(
+    LEGENDARY_ORDER.map((id) => [id, legendaries[id]?.quantity || 0])
+  ) as Record<string, number>;
+
   const filteredLegendaryIds = LEGENDARY_ORDER.filter((id) => {
     if (filterMode === 'active') {
-      return (legendaries[id]?.quantity || 0) > 0;
+      return (legendaries[id]?.quantity || 0) + (lairLegendaries[id] || 0) > 0;
     }
     if (filterMode === 'undead') {
       return LEGENDARIES[id].category === 'undead';
@@ -75,6 +86,7 @@ export const App: React.FC = () => {
         onToggleGlobalKeepReplacement={() => setGlobalKeepReplacement(!globalKeepReplacement)}
         onOpenPresets={() => setIsPresetsOpen(true)}
         onOpenStash={() => setIsStashOpen(true)}
+        onOpenLairLegendaries={() => setIsLairDrawerOpen(true)}
         onResetTargets={resetAllTargets}
         onResetFull={resetFull}
         onOpenGuide={() => setIsGuideOpen(true)}
@@ -132,7 +144,7 @@ export const App: React.FC = () => {
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              Active ({aggregate.totalLegendariesCount})
+              Active ({aggregate.totalBoardLegendariesCount})
             </button>
             <button
               type="button"
@@ -197,6 +209,9 @@ export const App: React.FC = () => {
                 onSetQuantity={(qty) => setQuantity(id, qty)}
                 onIncrement={() => incrementQuantity(id)}
                 onDecrement={() => decrementQuantity(id)}
+                onSetLairQuantity={(qty) => setLairQuantity(id, qty)}
+                onIncrementLairQuantity={() => incrementLairQuantity(id)}
+                onDecrementLairQuantity={() => decrementLairQuantity(id)}
                 onToggleKeepReplacement={(keep) => setKeepReplacement(id, keep)}
                 onSetOwnedStation={(lvl, count) => setOwnedStation(id, lvl, count)}
                 onSetSecondaryOwnedStation={(lvl, count) =>
@@ -222,17 +237,29 @@ export const App: React.FC = () => {
         )}
       </main>
 
-      {/* Floating Banked Runes Trigger (Bottom Right) */}
-      <div className="fixed bottom-5 right-5 z-30">
+      {/* Floating Action Triggers (Bottom Right) */}
+      <div className="fixed bottom-5 right-5 z-30 flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setIsLairDrawerOpen(true)}
+          className="group flex items-center gap-2 bg-gradient-to-r from-purple-700 to-indigo-700 hover:from-purple-600 hover:to-indigo-600 text-white px-3.5 py-3 rounded-2xl shadow-pixel border-2 border-purple-400 hover:scale-105 active:scale-95 transition-all duration-150"
+          title="Open In Lair Minions Vault (0 Runes)"
+        >
+          <Skull className="w-5 h-5 text-purple-200 group-hover:rotate-12 transition-transform" />
+          <span className="font-pixel text-[10px] tracking-wider uppercase text-purple-100">
+            IN LAIR {aggregate.totalLairLegendariesCount > 0 ? `(${aggregate.totalLairLegendariesCount})` : ''}
+          </span>
+        </button>
+
         <button
           type="button"
           onClick={() => setIsStashOpen(true)}
-          className="group flex items-center gap-2.5 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white px-4 py-3 rounded-2xl shadow-pixel border-2 border-amber-400 hover:scale-105 active:scale-95 transition-all duration-150"
+          className="group flex items-center gap-2 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white px-3.5 py-3 rounded-2xl shadow-pixel border-2 border-amber-400 hover:scale-105 active:scale-95 transition-all duration-150"
           title="Open Banked Runes Inventory"
         >
           <Coins className="w-5 h-5 text-amber-200 group-hover:rotate-12 transition-transform" />
           <span className="font-pixel text-[10px] tracking-wider uppercase text-amber-100">
-            RUNE STASH
+            RUNES
           </span>
         </button>
       </div>
@@ -267,6 +294,17 @@ export const App: React.FC = () => {
         isOpen={isPresetsOpen}
         onClose={() => setIsPresetsOpen(false)}
         onSelectPreset={applyPreset}
+      />
+
+      <LairLegendariesDrawer
+        isOpen={isLairDrawerOpen}
+        onClose={() => setIsLairDrawerOpen(false)}
+        lairLegendaries={lairLegendaries}
+        craftQuantities={craftQuantities}
+        onSetLairQuantity={setLairQuantity}
+        onIncrementLairQuantity={incrementLairQuantity}
+        onDecrementLairQuantity={decrementLairQuantity}
+        onClearLairLegendaries={clearLairLegendaries}
       />
 
       <RuneStashDrawer

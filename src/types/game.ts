@@ -30,6 +30,7 @@ export type LegendaryGroup = 'group1' | 'group2' | 'group3' | 'group4';
 
 export interface LegendaryBuffs {
   timeShards: number;
+  subsequentTimeShards?: number;
   maxMana?: number;
   maxSlime?: number;
   maxDarkness?: number;
@@ -37,6 +38,8 @@ export interface LegendaryBuffs {
   resourceGen?: number;  // The Cursed
   combatFood?: boolean;  // The Colossus
   duplicateChance?: number; // The Infernal
+  levelSkipChance?: number; // Archdemon
+  stationSpeedBonus?: number; // Soul Stalker
 }
 
 export interface SecondaryStationDef {
@@ -49,6 +52,8 @@ export interface LegendaryDef {
   name: string;
   stationName: string;
   secondaryStationName?: string;
+  requiredStationLevel?: StationLevel; // Defaults to 5, Soul Grinder is 2
+  maxQuantity?: number; // Maximum limit on lair board (e.g. 4 for Archdemon/Robo-Chicken/Shield Bot, 1 for fusions)
   category: 'undead' | 'unholy' | 'eldritch' | 'alien' | 'fusion';
   group: LegendaryGroup;
   baseL1Cost: Partial<Record<RuneType, number>>;
@@ -71,8 +76,12 @@ export interface LegendaryState {
 
 export type StashState = Record<RuneType, number>;
 
+export type LairLegendariesState = Record<LegendaryId, number>;
+
 export interface LegendaryCalculationResult {
-  quantity: number;
+  quantity: number; // To craft / summon
+  lairQuantity: number; // Already in lair
+  totalBoardQuantity: number; // quantity + lairQuantity
   keepReplacement: boolean;
   grossL5Stations: number;
   grossL1Stations: number;
@@ -96,6 +105,8 @@ export interface GroupBonusResult {
   group: LegendaryGroup;
   name: string;
   isComplete: boolean;
+  completeSets: number;
+  claimedSets: number;
   baseBonus: number;
   effectiveBonus: number;
   members: LegendaryId[];
@@ -114,9 +125,10 @@ export interface TimeShardCalculationResult {
   baseShards: number;
   featTier: number;
   featBonusPercent: number;
-  legendariesBonusPercent: number;
-  groupsBonusPercent: number;
-  otherBonusPercent: number;
+  legendariesBonusPercent: number; // Individual legendaries bonus (e.g. 335%)
+  groupsBonusPercent: number; // Groups set bonus (e.g. 140%)
+  totalLegendariesAndGroupsPercent: number; // Base 100% + legendaries + groups (e.g. 575%)
+  otherBonusPercent: number; // Total Other % from game (e.g. 240%)
   totalMultiplier: number;
   totalTimeShards: number;
   groups: GroupBonusResult[];
@@ -137,7 +149,9 @@ export interface AggregateCalculationResult {
     resourceGen: number;
     duplicateChance: number;
   };
-  totalLegendariesCount: number;
+  totalLegendariesCount: number; // To craft
+  totalLairLegendariesCount: number; // In lair
+  totalBoardLegendariesCount: number; // Total on board
   totalBaseStationsNeeded: number;
   isAllFulfilled: boolean;
   timeShardsEstimate: TimeShardCalculationResult;

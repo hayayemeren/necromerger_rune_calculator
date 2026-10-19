@@ -50,9 +50,11 @@ export const StatsTracker: React.FC<StatsTrackerProps> = ({ aggregate }) => {
 
           <div className="flex items-baseline gap-2">
             <span className="font-pixel text-lg sm:text-xl text-amber-300 tracking-tight">
-              +{totalBuffs.timeShards}%
+              {aggregate.timeShardsEstimate.totalLegendariesAndGroupsPercent}%
             </span>
-            <span className="text-[10px] text-slate-400 font-mono">From Legendaries</span>
+            <span className="text-[10px] text-slate-400 font-mono">
+              Base 100% + {totalBuffs.timeShards}% + Sets
+            </span>
           </div>
         </div>
 
@@ -95,10 +97,14 @@ export const StatsTracker: React.FC<StatsTrackerProps> = ({ aggregate }) => {
         {/* Totals: Creatures & L1 Stations */}
         <div className="col-span-2 sm:col-span-1 md:col-span-1 bg-slate-900 border-2 border-slate-700 rounded-xl p-2.5 shadow-pixel flex flex-col justify-between">
           <div className="flex items-center justify-between text-slate-400 text-[9px] font-pixel">
-            <span>TARGETS</span>
-            <span className="text-white font-bold">{totalLegendariesCount}</span>
+            <span>BOARD</span>
+            <span className="text-white font-bold">{aggregate.totalBoardLegendariesCount}</span>
           </div>
           <div className="mt-1 pt-1 border-t border-slate-800 text-[10px] text-slate-300 font-mono flex items-center justify-between">
+            <span>To Craft:</span>
+            <span className="text-teal-400 font-bold">{totalLegendariesCount}</span>
+          </div>
+          <div className="text-[9px] text-slate-500 font-mono flex items-center justify-between">
             <span>Net L1s:</span>
             <span className="text-amber-400 font-bold">{formatNumber(totalBaseStationsNeeded)}</span>
           </div>
